@@ -1,0 +1,17 @@
+# Frontend
+frontend/node_modules/
+frontend/.next/
+.next/
+node_modules/
+
+# Backend
+backend/venv/
+backend/__pycache__/
+venv/
+*.pyc
+
+# Large AI context files
+*.xml
+
+# Security (Never push API keys)
+.env
