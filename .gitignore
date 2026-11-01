@@ -10,8 +10,6 @@ backend/__pycache__/
 venv/
 *.pyc
 
-# Large AI context files
-*.xml
 
 # Security (Never push API keys)
 .env

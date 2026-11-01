@@ -1,27 +1,304 @@
 @import "tailwindcss";
 
-@layer base {
-  body {
-    background-color: #030712;
-    color: #ffffff;
-    font-family: 'Inter', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+/* ------------------------------------------------------------------
+   HUMAN UTILIZATION  //  "Deep Canopy" DNA
+   Background : #04100b  (deep pine-black, luminance ~0.4%  -> well under 10%)
+   Accent     : #b8f23f  "Vital Lime"  (workforce vitality / living signal)
+   Text       : #d9ead6  soft sage-mist (never pure white)
+   Status     : lime = Optimal, amber = Warning, red = Critical
+------------------------------------------------------------------- */
+
+/* Plain CSS variables: used by the map, markers and inline styles */
+:root {
+  --deep: #04100b;
+  --surface: #0a1812;
+  --surface-2: #0f2119;
+  --line: rgba(217, 234, 214, 0.12);
+  --mist: #d9ead6;
+  --moss: #7e9686;
+  --accent: #b8f23f;
+  --sky: #6ec8ff;
+  --warn: #ffb02e;
+  --crit: #ff4d6a;
 }
 
-@layer utilities {
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent; 
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #1F2937; 
-    border-radius: 10px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #374151; 
+/* Tailwind v4 tokens (this is what generates bg-deep, text-accent, etc.) */
+@theme inline {
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-dm-sans), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+
+  --color-deep: #04100b;
+  --color-surface: #0a1812;
+  --color-surface-2: #0f2119;
+  --color-line: rgba(217, 234, 214, 0.12);
+  --color-mist: #d9ead6;
+  --color-moss: #7e9686;
+  --color-accent: #b8f23f;
+  --color-sky: #6ec8ff;
+  --color-warn: #ffb02e;
+  --color-crit: #ff4d6a;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--deep);
+  color: var(--mist);
+  font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--deep);
+}
+
+/* ---------- small type helpers ---------- */
+.eyebrow {
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--moss);
+}
+
+.gradient-text {
+  background: linear-gradient(110deg, #f2ffd0 0%, #b8f23f 55%, #6ec8ff 130%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- map ---------- */
+.radar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 180vmax;
+  height: 180vmax;
+  margin-left: -90vmax;
+  margin-top: -90vmax;
+  pointer-events: none;
+  background: conic-gradient(
+    from 0deg,
+    rgba(184, 242, 63, 0) 0deg,
+    rgba(184, 242, 63, 0.09) 28deg,
+    rgba(184, 242, 63, 0) 29deg,
+    rgba(184, 242, 63, 0) 360deg
+  );
+  animation: spin 18s linear infinite;
+  will-change: transform;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(4, 16, 11, 0.85) 100%);
+}
+
+.route {
+  stroke-dasharray: 6 8;
+  animation: flow 1.4s linear infinite;
+}
+
+/* hub (facility) */
+.hub {
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  cursor: pointer;
+}
+.hub-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1px dashed rgba(217, 234, 214, 0.35);
+  animation: spin 26s linear infinite;
+  transition: border-color 0.3s;
+}
+.hub[data-active="true"] .hub-ring {
+  border-color: var(--accent);
+}
+.hub-core {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--mist);
+  transition: border-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+.hub:hover .hub-core,
+.hub[data-active="true"] .hub-core {
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 24px -4px var(--accent);
+}
+.hub-label {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  font-family: var(--font-bricolage), sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  color: var(--mist);
+}
+
+/* crew marker */
+.marker {
+  --c: var(--accent);
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.marker-ring {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid var(--c);
+  animation: ping 2.4s ease-out infinite;
+}
+.marker-core {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--c);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 25%, transparent), 0 0 22px var(--c);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.marker:hover .marker-core {
+  transform: scale(1.25);
+}
+.marker[data-active="true"] .marker-core {
+  transform: scale(1.6);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--c) 30%, transparent), 0 0 36px var(--c);
+}
+.marker-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: -2px;
+  padding: 0.3rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1.15;
+  transition: background 0.25s, border-color 0.25s;
+}
+.marker:hover .marker-label,
+.marker[data-active="true"] .marker-label {
+  background: #0a1812;
+  border-color: color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+/* ---------- segmented controls ---------- */
+.seg {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 12px;
+  background: #07130d;
+  border: 1px solid var(--line);
+}
+.seg-btn {
+  flex: 1;
+  padding: 0.55rem 0.85rem;
+  border-radius: 9px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--moss);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.seg-btn:hover {
+  color: var(--mist);
+}
+.seg-btn[aria-pressed="true"] {
+  background: var(--acc, var(--accent));
+  color: #04100b;
+  box-shadow: 0 6px 18px -6px var(--acc, var(--accent));
+}
+
+/* ---------- animations ---------- */
+@keyframes ping {
+  0% { transform: scale(0.8); opacity: 0.9; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes flow {
+  to { stroke-dashoffset: -28; }
+}
+@keyframes fadeup {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fadeup 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.blink {
+  animation: blink 1.6s ease-in-out infinite;
+}
+
+/* ---------- charts ---------- */
+.recharts-text,
+.recharts-tooltip-wrapper {
+  font-family: var(--font-dm-mono), ui-monospace, monospace !important;
+}
+
+/* ---------- scrollbar ---------- */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #1d3328;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radar,
+  .hub-ring,
+  .marker-ring,
+  .route,
+  .blink {
+    animation: none;
   }
 }
