@@ -352,6 +352,10 @@ export default function ShiftProductivityDashboard() {
                   <span className="blink inline-block h-2 w-2 shrink-0 rounded-full bg-accent shadow-[0_0_8px_#b8f23f]"></span>
                   Real-Time Operational Intelligence
                 </p>
+                <p className="mt-0.5 flex items-center gap-2 text-[11px] font-medium text-moss sm:text-sm">
+                  <span className="blink inline-block h-2 w-2 shrink-0 rounded-full bg-accent shadow-[0_0_8px_#b8f23f]"></span>
+                  Infocreon Internship
+                </p>
               </div>
             </div>
 
