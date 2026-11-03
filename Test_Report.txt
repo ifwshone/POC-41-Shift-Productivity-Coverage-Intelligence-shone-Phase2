@@ -5,4 +5,4 @@ TC-1 (Visual Load): PASS - Background and map visualization container are visibl
 TC-2 (The Handshake): PASS - Marker clicked, intelligence panel opened, data loaded, and panel closed successfully.
 TC-3 (The Signature): PASS - Info modal opened and operative identity 'Shone Shinoy' verified.
 
-
+.
